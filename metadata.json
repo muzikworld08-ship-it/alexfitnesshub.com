@@ -1,0 +1,8 @@
+{
+  "name": "Remix AlexFitnessHub",
+  "description": "A modern, premium, and fully functional fitness platform with custom workout libraries, AI coaching, secure payments, and progress tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

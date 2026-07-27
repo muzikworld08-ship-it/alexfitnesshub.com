@@ -1,0 +1,208 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net (Catch-all)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'alexfitnesshub@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isPremium() {
+      return isSignedIn() && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.subscriptionStatus == 'premium'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) && 
+        request.resource.data.uid == userId && 
+        request.resource.data.email is string &&
+        request.resource.data.role == 'user' &&
+        request.resource.data.subscriptionStatus == 'free' &&
+        request.resource.data.subscriptionTier == 'none') || isAdmin();
+      allow update: if (isOwner(userId) || isAdmin()) && 
+        request.resource.data.uid == userId &&
+        (isAdmin() || (
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.subscriptionStatus == resource.data.subscriptionStatus &&
+          request.resource.data.subscriptionTier == resource.data.subscriptionTier
+        )); // prevent privilege escalation and unauthorized subscription updates
+      allow delete: if isAdmin();
+    }
+
+    // --- Exercises Collection ---
+    match /exercises/{exerciseId} {
+      allow read: if true; // Everyone can read metadata, but client renders detail depending on premium
+      allow write: if isAdmin();
+    }
+
+    // --- User Workout Actions ---
+    match /user_workout_actions/{actionId} {
+      allow read, write: if isSignedIn() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Progress Logs ---
+    match /progress_logs/{logId} {
+      allow read, write: if isSignedIn() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Transactions ---
+    match /transactions/{transactionId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) || 
+        isAdmin()
+      );
+    }
+
+    // --- AI Coach Chats ---
+    match /ai_coach_chats/{chatId} {
+      allow read, write: if isPremium() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Custom Programs ---
+    match /custom_programs/{programId} {
+      allow read, write: if isPremium() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Favorite Videos ---
+    match /favorite_videos/{favoriteId} {
+      allow read, write: if isPremium() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Video Search History ---
+    match /video_search_history/{historyId} {
+      allow read, write: if isPremium() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Testimonials ---
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Popup Testimonials ---
+    match /popup_testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Payments ---
+    match /payments/{paymentId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // --- Weekly Reports ---
+    match /weekly_reports/{reportId} {
+      allow read: if isPremium() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // --- Vitals Logs ---
+    match /vitals_logs/{logId} {
+      allow read, write: if isSignedIn() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Community Posts ---
+    match /community_posts/{postId} {
+      allow read: if isPremium();
+      allow write: if isPremium() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Generated Exercises ---
+    match /generated_exercises/{exerciseId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // --- User Inspirations (Poster Art Gallery) ---
+    match /user_inspirations/{inspirationId} {
+      allow read, write: if isPremium() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // --- Belly Fat Shred Program ---
+    match /belly_fat_shred_progress/{userId} {
+      allow read, write: if isPremium() && isOwner(userId);
+    }
+
+    // --- Premium 90 Day Challenges ---
+    match /user_premium_challenges/{userId} {
+      allow read, write: if isPremium() && isOwner(userId);
+    }
+
+    // --- Workout Library Filters ---
+    match /workout_library_filters/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if (isOwner(userId) && 
+        request.resource.data.userId == userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // --- Mail (Firebase Trigger Email Extension) ---
+    match /mail/{mailId} {
+      allow read: if isSignedIn() && (resource.data.to == request.auth.token.email || isAdmin());
+      allow create: if isSignedIn() && (request.resource.data.to == request.auth.token.email || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+  }
+}

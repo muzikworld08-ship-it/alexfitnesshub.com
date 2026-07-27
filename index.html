@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval' data: blob:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; connect-src 'self' https:;" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Surrogate-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>ALEXFITNESSHUB | Premium Fitness Training Platform</title>
+    <meta name="description" content="ALEXFITNESSHUB is a premium fitness platform offering personalized workout plans, AI coaching, nutrition guidance, progress tracking, and secure subscription management." />
+    <meta name="keywords" content="fitness, workout planner, AI coaching, ALEXFITNESSHUB, muscle gain, fat loss, weight tracking, sports science" />
+    <meta name="author" content="ALEXFITNESSHUB" />
+    <meta name="publisher" content="ALEXFITNESSHUB" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ALEXFITNESSHUB | Premium Fitness Training Platform" />
+    <meta property="og:description" content="ALEXFITNESSHUB is a premium fitness platform offering personalized workout plans, AI coaching, nutrition guidance, progress tracking, and secure subscription management." />
+    <meta property="og:site_name" content="ALEXFITNESSHUB" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ALEXFITNESSHUB | Premium Fitness Training Platform" />
+    <meta name="twitter:description" content="ALEXFITNESSHUB is a premium fitness platform offering personalized workout plans, AI coaching, nutrition guidance, progress tracking, and secure subscription management." />
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+    <link rel="apple-touch-icon" href="/icon-192.jpg" />
+    <meta name="theme-color" content="#000000" />
+    <script src="https://js.paystack.co/v2/inline.js"></script>
+    <script>
+      // Register Service Worker for PWA (with auto-reload prevention)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+        
+        // Unregister all other/outdated service workers
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            var reg = registrations[i];
+            if (reg.active && !reg.active.scriptURL.endsWith('/sw.js')) {
+              reg.unregister().then(function(success) {
+                if (success) console.log('[DevOps SW Cleanup] Unregistered outdated SW:', reg.scope);
+              });
+            }
+          }
+        });
+      }
+
+      // Aggressively flush old caches if any exist to ensure pristine production asset sync
+      if ('caches' in window) {
+        caches.keys().then(function(keys) {
+          keys.forEach(function(key) {
+            caches.delete(key).then(function() {
+              console.log('[DevOps Cache Cleanup] Deleted stale cache bucket:', key);
+            });
+          });
+        });
+      }
+
+      // Immediately set theme from localStorage on load to prevent light theme flash
+      try {
+        var savedTheme = localStorage.getItem("fit_theme");
+        if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

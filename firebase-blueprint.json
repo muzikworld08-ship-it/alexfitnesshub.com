@@ -1,0 +1,338 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Store user accounts, settings, and subscription status.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "subscriptionStatus": { "type": "string", "enum": ["free", "premium"] },
+        "subscriptionTier": { "type": "string", "enum": ["monthly", "yearly", "none"] },
+        "subscriptionExpiry": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "fitnessGoals": { "type": "string" },
+        "weight": { "type": "number" },
+        "height": { "type": "number" },
+        "gender": { "type": "string" }
+      },
+      "required": ["uid", "email", "role", "subscriptionStatus"]
+    },
+    "Workout": {
+      "title": "Workout Program / Exercise",
+      "description": "Represents an individual exercise or pre-made workout routine.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "muscleGroups": { "type": "array" },
+        "difficulty": { "type": "string" },
+        "instructions": { "type": "array" },
+        "equipment": { "type": "array" },
+        "category": { "type": "string" },
+        "illustrationSvg": { "type": "string" },
+        "commonMistakes": { "type": "array" },
+        "safetyTips": { "type": "array" },
+        "alternativeExercises": { "type": "array" },
+        "progressionVariations": { "type": "array" },
+        "isPremium": { "type": "boolean" }
+      },
+      "required": ["id", "name", "category", "isPremium"]
+    },
+    "UserWorkoutAction": {
+      "title": "Saved / Completed Workout",
+      "description": "User specific custom logged active session or favorite workout status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "workoutId": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "saved": { "type": "boolean" },
+        "loggedAt": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "userId", "workoutId"]
+    },
+    "ProgressLog": {
+      "title": "User Weight or Metric Log",
+      "description": "Allows tracking muscle specs, body weights, and personal tracking records.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "weight": { "type": "number" },
+        "bodyFat": { "type": "number" },
+        "calories": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "userId", "date"]
+    },
+    "Transaction": {
+      "title": "Paystack Subscription Payment",
+      "description": "Details of user paystack invoice receipts.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "reference": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "plan": { "type": "string" },
+        "paidAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "reference", "amount", "status"]
+    },
+    "AICoachChat": {
+      "title": "AI Coach Conversation Node",
+      "description": "Log of messages exchanged between the premium user and the AI coach.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "role", "message", "timestamp"]
+    },
+    "CustomProgram": {
+      "title": "Custom Workout Program",
+      "description": "User created structured training programs built from the exercise library.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schedule": { "type": "array" }
+      },
+      "required": ["id", "userId", "name", "schedule"]
+    },
+    "FavoriteVideo": {
+      "title": "Favorite Video Link",
+      "description": "Logged-in user favorited gym or home workout videos.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "videoId": { "type": "string" },
+        "title": { "type": "string" },
+        "channelTitle": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "duration": { "type": "string" },
+        "viewCount": { "type": "string" },
+        "publishedAt": { "type": "string" },
+        "savedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "videoId", "title", "savedAt"]
+    },
+    "VideoSearchHistory": {
+      "title": "Video Search Log",
+      "description": "Logged-in user search trail for autocomplete recommendations.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "query": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "query", "timestamp"]
+    },
+    "PopupTestimonial": {
+      "title": "Customer Testimonial",
+      "description": "Reviews and testimonials managed by administrators.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "country": { "type": "string" },
+        "avatar": { "type": "string" },
+        "rating": { "type": "number" },
+        "review": { "type": "string" },
+        "membership_plan": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["enabled", "disabled"] }
+      },
+      "required": ["id", "name", "country", "rating", "review", "status"]
+    },
+    "WeeklyReport": {
+      "title": "Weekly Progress Report",
+      "description": "Weekly generated summary of workout time, weight progress, and coach advice for premium users.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "reportContent": { "type": "string" },
+        "totalWorkouts": { "type": "number" },
+        "totalWorkoutTimeMinutes": { "type": "number" },
+        "milestones": { "type": "array" },
+        "sentAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "email", "reportContent", "sentAt"]
+    },
+    "BellyFatShredProgress": {
+      "title": "Belly Fat Shred Progress",
+      "description": "Durable user progress for the 5-Month Belly Fat Shred Program.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "currentWeek": { "type": "number" },
+        "currentDay": { "type": "number" },
+        "completedWorkouts": { "type": "array" },
+        "completedRuns": { "type": "array" },
+        "waterIntake": { "type": "number" },
+        "hydrationHistory": { "type": "object" },
+        "walkingHistory": { "type": "object" },
+        "nutritionChecklist": { "type": "object" },
+        "weightHistory": { "type": "array" },
+        "waistHistory": { "type": "array" },
+        "progressPhotos": { "type": "array" },
+        "achievements": { "type": "array" },
+        "streaks": { "type": "object" },
+        "lemonCucumberWaterCompleted": { "type": "array" },
+        "dailyChecklistHistory": { "type": "object" },
+        "reminders": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "currentWeek", "currentDay"]
+    },
+    "Premium90DayChallengeProgress": {
+      "title": "Premium 90 Day Challenge Progress",
+      "description": "Personalized 90-day training progress, measurement logs, history, and streaks for premium athletes.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "challengeId": { "type": "string" },
+        "currentDay": { "type": "number" },
+        "onboarding": { "type": "object" },
+        "completedDays": { "type": "array" },
+        "workoutHistory": { "type": "array" },
+        "bodyMeasurements": { "type": "array" },
+        "progressPhotos": { "type": "array" },
+        "personalRecords": { "type": "array" },
+        "streaks": { "type": "object" },
+        "achievements": { "type": "array" },
+        "notificationsSettings": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "challengeId", "currentDay"]
+    },
+    "WorkoutLibraryFilters": {
+      "title": "Workout Library Filter Settings",
+      "description": "User specific persistent search filters and active tabs.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "searchQuery": { "type": "string" },
+        "selectedCategory": { "type": "string" },
+        "selectedDifficulty": { "type": "string" },
+        "selectedMuscleGroup": { "type": "string" },
+        "selectedEquipment": { "type": "string" },
+        "selectedExerciseType": { "type": "string" },
+        "selectedTrainingGoal": { "type": "string" },
+        "activeBrowseTab": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId"]
+    },
+    "Mail": {
+      "title": "Trigger Email",
+      "description": "Email queue document for the Firebase Trigger Email Extension.",
+      "type": "object",
+      "properties": {
+        "to": { "type": "string" },
+        "message": {
+          "type": "object",
+          "properties": {
+            "subject": { "type": "string" },
+            "text": { "type": "string" },
+            "html": { "type": "string" }
+          },
+          "required": ["subject", "html"]
+        },
+        "delivery": {
+          "type": "object",
+          "properties": {
+            "startTime": { "type": "string", "format": "date-time" },
+            "endTime": { "type": "string", "format": "date-time" },
+            "state": { "type": "string" },
+            "error": { "type": "string" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["to", "message"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Primary user profile document containing details about their subscription and metadata."
+    },
+    "exercises/{exerciseId}": {
+      "schema": "Workout",
+      "description": "Comprehensive exercises database documents which can be added by admin."
+    },
+    "user_workout_actions/{actionId}": {
+      "schema": "UserWorkoutAction",
+      "description": "User records for saved or completed exercises/workouts."
+    },
+    "progress_logs/{logId}": {
+      "schema": "ProgressLog",
+      "description": "Periodic stats logs for graph display on the dashboard."
+    },
+    "transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Historical audit of Paystack subscription purchases."
+    },
+    "ai_coach_chats/{chatId}": {
+      "schema": "AICoachChat",
+      "description": "Conversation nodes tracking prompt interactions with the AI coach."
+    },
+    "custom_programs/{programId}": {
+      "schema": "CustomProgram",
+      "description": "User created custom structured workout programs for premium dashboard."
+    },
+    "favorite_videos/{favoriteId}": {
+      "schema": "FavoriteVideo",
+      "description": "User's bookmarked or pinned workout video cards."
+    },
+    "video_search_history/{historyId}": {
+      "schema": "VideoSearchHistory",
+      "description": "Historic search queries triggered by user of videos page."
+    },
+    "popup_testimonials/{testimonialId}": {
+      "schema": "PopupTestimonial",
+      "description": "Customer testimonials displayed in the slide-in popup."
+    },
+    "weekly_reports/{reportId}": {
+      "schema": "WeeklyReport",
+      "description": "Durable weekly email reports dispatched to premium users."
+    },
+    "belly_fat_shred_progress/{userId}": {
+      "schema": "BellyFatShredProgress",
+      "description": "User specific progress tracking for the 5-Month Belly Fat Shred Program."
+    },
+    "user_premium_challenges/{userId}": {
+      "schema": "Premium90DayChallengeProgress",
+      "description": "Athlete personalized 90-day training logs and progress metrics for premium users."
+    },
+    "workout_library_filters/{userId}": {
+      "schema": "WorkoutLibraryFilters",
+      "description": "User specific persistent search filters and active tabs."
+    },
+    "mail/{mailId}": {
+      "schema": "Mail",
+      "description": "Email queue for Trigger Email extension."
+    }
+  }
+}
